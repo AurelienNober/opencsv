@@ -40,11 +40,14 @@ public class CSVReader implements Closeable {
     private int skipLines;
 
     private boolean linesSkiped;
+    private int maxRowChars; // checks are loose
 
     /**
      * The default line to start reading.
      */
     public static final int DEFAULT_SKIP_LINES = 0;
+
+    private static final int DEFAULT_MAX_ROW_CHARS = -1;
 
     /**
      * Constructs CSVReader using a comma for the separator.
@@ -195,6 +198,34 @@ public class CSVReader implements Closeable {
         this.skipLines = line;
     }
 
+    public CSVReader(Reader reader, Character separator, Character quotechar, Character escape, Integer line, Boolean strictQuotes, Boolean ignoreLeadingWhiteSpace, Integer maxRowChars) {
+        this.br = new BufferedReader(reader);
+        if (separator == null) {
+            separator = CSVParser.DEFAULT_SEPARATOR;
+        }
+        if (quotechar == null) {
+            quotechar = CSVParser.DEFAULT_QUOTE_CHARACTER;
+        }
+        if (escape == null) {
+            escape = CSVParser.DEFAULT_ESCAPE_CHARACTER;
+        }
+        if (line == null) {
+            line = DEFAULT_SKIP_LINES;
+        }
+        if (strictQuotes == null) {
+            strictQuotes = CSVParser.DEFAULT_STRICT_QUOTES;
+        }
+        if (ignoreLeadingWhiteSpace == null) {
+            ignoreLeadingWhiteSpace = CSVParser.DEFAULT_IGNORE_LEADING_WHITESPACE;
+        }
+        if (maxRowChars == null) {
+            maxRowChars = DEFAULT_MAX_ROW_CHARS;
+        }
+        this.parser = new CSVParser(separator, quotechar, escape, strictQuotes, ignoreLeadingWhiteSpace);
+        this.skipLines = line;
+        this.maxRowChars = maxRowChars;
+    }
+
    /**
      * Reads the entire file into a List with each element being a String[] of
      * tokens.
@@ -229,6 +260,7 @@ public class CSVReader implements Closeable {
     public String[] readNext() throws IOException {
     	
     	String[] result = null;
+        int currentRowChars = 0;
     	do {
     		String nextLine = getNextLine();
     		if (!hasNext) {
@@ -245,6 +277,11 @@ public class CSVReader implements Closeable {
     				result = t;
     			}
     		}
+            currentRowChars += nextLine.length() + 1;
+            // checking row length every line is good enough
+            if (this.maxRowChars >= 0 && currentRowChars > this.maxRowChars) {
+                throw new IOException("Current row length " + currentRowChars + " exceeds the limit " + maxRowChars);
+            }
     	} while (parser.isPending());
     	return result;
     }
