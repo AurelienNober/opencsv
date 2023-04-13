@@ -25,7 +25,7 @@ limitations under the License.
 		<property name="classes.dir" location="build/classes"/>
 		<property name="test.classes.dir" location="build/test.classes"/>
 		<property name="reports.dir" location="build/reports"/>
-		<property name="deploy.dir" location="deploy"/>
+		<property name="deploy.dir" location="build/libs"/>
 		<property name="lib.dir" location="lib"/>
 		<property name="app.name" value="opencsv"/>
 		

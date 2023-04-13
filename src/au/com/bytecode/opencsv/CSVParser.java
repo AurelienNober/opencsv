@@ -37,7 +37,7 @@ public class CSVParser {
 
     private final boolean strictQuotes;
 
-    private String pending;
+    private StringBuilder pending;
     private boolean inField = false;
 
     private final boolean ignoreLeadingWhiteSpace;
@@ -194,7 +194,7 @@ public class CSVParser {
 
         if (nextLine == null) {
             if (pending != null) {
-                String s = pending;
+                String s = pending.toString();
                 pending = null;
                 return new String[]{s};
             } else {
@@ -206,7 +206,7 @@ public class CSVParser {
         StringBuilder sb = new StringBuilder(INITIAL_READ_SIZE);
         boolean inQuotes = false;
         if (pending != null) {
-            sb.append(pending);
+            sb = pending;
             pending = null;
             inQuotes = true;
         }
@@ -231,7 +231,7 @@ public class CSVParser {
                                 && nextLine.charAt(i - 1) != this.separator //not at the beginning of an escape sequence
                                 && nextLine.length() > (i + 1) &&
                                 nextLine.charAt(i + 1) != this.separator //not at the	end of an escape sequence
-                                ) {
+                        ) {
 
                             if (ignoreLeadingWhiteSpace && sb.length() > 0 && isAllWhiteSpace(sb)) {
                                 sb.setLength(0);  //discard white space leading up to quote
@@ -262,7 +262,7 @@ public class CSVParser {
             if (multi) {
                 // continuing a quoted section, re-append newline
                 sb.append("\n");
-                pending = sb.toString();
+                pending = sb;
                 sb = null; // this partial content is not to be added to field list yet
             } else {
                 throw new IOException("Un-terminated quoted field at end of CSV line");

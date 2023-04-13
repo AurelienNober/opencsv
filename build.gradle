@@ -1,0 +1,54 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.7'
+}
+
+group = 'net.sf.opencsv'
+version = '2.3_anober'
+description = 'opencsv'
+java.sourceCompatibility = JavaVersion.VERSION_1_5
+
+sourceSets {
+    main {
+        java {
+            srcDirs = [ "src" ]
+            destinationDirectory.set(file("build/classes"))
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+jar {
+    into("META-INF/maven/$project.group/$project.name") {
+        from "pom.xml"
+    }
+    manifest {
+        attributes(
+            "Created-By": "Gradle",
+            "Built-Date": new Date(),
+            "Built-JDK": System.getProperty("java.version"),
+            "Implementation-Title": project.name,
+            "Implementation-Version": version,
+            "Implementation-URL": "https://opencsv.sourceforge.net/",
+            "Bundle-License": "https://opencsv.sourceforge.net/licenses.html",
+        )
+    }
+}
